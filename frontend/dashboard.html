@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grant Genie — Dashboard</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+ 
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">Grant<span>Genie</span></a>
+  <div class="nav-right">
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <span class="nav-user" id="nav-user-name"></span>
+    <button class="btn-nav" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);" onclick="logout()">Sign out</button>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+ 
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-link" id="mobile-user-name" style="color:var(--teal-mid);pointer-events:none;"></span>
+  <span class="mobile-link" onclick="logout()">Sign out</span>
+</div>
+ 
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="spinner-text" id="spinner-text">Analysing your profile and matching grants...</div>
+</div>
+ 
+<!-- DASHBOARD LAYOUT -->
+<div class="dash-layout">
+ 
+  <!-- SIDEBAR (hidden on mobile) -->
+  <div class="sidebar">
+    <div class="sidebar-user">
+      <div class="avatar" id="user-avatar">GG</div>
+      <div>
+        <div class="user-name" id="user-name">Researcher</div>
+        <div class="user-role">Early Career Researcher</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-item active">
+        <div class="sidebar-dot"></div>Match Grants
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot"></div>Saved Results
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot"></div>Alternative Pool
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot"></div>Algorithm Report
+      </div>
+      <div class="sidebar-item" style="margin-top:32px;" onclick="logout()">
+        <div class="sidebar-dot"></div>Sign Out
+      </div>
+    </div>
+  </div>
+ 
+  <!-- MAIN CONTENT -->
+  <div class="dash-main">
+ 
+    <div class="dash-header">
+      <h2>Welcome, <span id="dash-name">Researcher</span></h2>
+      <p>Upload your research profile to find your most relevant funding opportunities.</p>
+    </div>
+ 
+    <!-- Upload Card -->
+    <div class="upload-card">
+      <h3>Find Matching Grants</h3>
+ 
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" class="upload-input" id="file-input" accept=".pdf"/>
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <div class="upload-title" id="upload-title">Click to upload your research profile</div>
+        <div class="upload-sub">PDF files only &mdash; max 10MB</div>
+      </div>
+ 
+      <div class="divider">or paste your summary</div>
+ 
+      <textarea
+        class="form-textarea"
+        id="research-text"
+        rows="5"
+        placeholder="I am an early career researcher specialising in Artificial Intelligence and Healthcare. My work focuses on machine learning applications in clinical data analysis..."
+      ></textarea>
+      <div class="char-count" id="char-count">0 / 5000 characters</div>
+ 
+      <button class="match-btn" onclick="runMatch()">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Match my grants
+      </button>
+    </div>
+ 
+    <!-- Results -->
+    <div class="results-section" id="results-section">
+ 
+      <div class="results-header">
+        <div>
+          <h3>Your Matched Grants</h3>
+          <p>Best algorithm: <strong>Hybrid</strong> &mdash; F1 Score: 0.84</p>
+        </div>
+        <div class="algo-info">Hybrid selected</div>
+      </div>
+ 
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="top">Top matches</button>
+        <button class="filter-btn" data-filter="mid">Partial</button>
+        <button class="filter-btn" data-filter="alt">Alternative pool</button>
+      </div>
+ 
+      <div id="grants-list"></div>
+ 
+      <div class="export-row">
+        <button class="export-btn export-csv" id="export-csv">Export CSV</button>
+        <button class="export-btn export-excel" id="export-excel">Export Excel</button>
+      </div>
+ 
+    </div>
+ 
+  </div>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+ 
+<script src="js/main.js"></script>
+<script>
+// Load user
+(function () {
+  var raw = localStorage.getItem('gg_user');
+  if (!raw) {
+    window.location.href = 'login.html';
+    return;
+  }
+  var user = JSON.parse(raw);
+  var name = user.name || user.email.split('@')[0];
+  var firstName = name.split(' ')[0];
+ 
+  document.getElementById('dash-name').textContent = firstName;
+  document.getElementById('user-name').textContent = name;
+  document.getElementById('nav-user-name').textContent = firstName;
+ 
+  var mobName = document.getElementById('mobile-user-name');
+  if (mobName) mobName.textContent = name;
+ 
+  var initials = name.split(' ').map(function (w) { return w[0] || ''; }).join('').toUpperCase().slice(0, 2);
+  document.getElementById('user-avatar').textContent = initials || 'GG';
+})();
+ 
+function logout() {
+  localStorage.removeItem('gg_user');
+  window.location.href = 'index.html';
+}
+ 
+function runMatch() {
+  var text = document.getElementById('research-text').value;
+  var file = document.getElementById('file-input').files[0];
+ 
+  if (!text.trim() && !file) {
+    showToast('Please upload a PDF or enter your research summary');
+    return;
+  }
+ 
+  showLoading('Analysing your profile and matching grants...');
+ 
+  setTimeout(function () {
+    hideLoading();
+    showResults();
+  }, 2800);
+}
+</script>
+</body>
+</html>

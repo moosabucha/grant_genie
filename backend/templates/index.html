@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-badge">AI-Powered Research Funding</div>
+  <h1>Find Your Perfect<br><em>Grant Match</em></h1>
+  <p class="hero-sub">Upload your research profile and let Grant Genie match you with the most relevant funding calls using three powerful NLP algorithms.</p>
+  <div class="hero-btns">
+    <a href="{{ url_for('auth.register') }}" class="btn-primary">Get Started</a>
+    <a href="{{ url_for('auth.login') }}" class="btn-outline">Login</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num" data-target="800" data-suffix="+">0</div>
+    <div class="stat-label">Grant Calls Indexed</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-target="3" data-suffix="">0</div>
+    <div class="stat-label">Matching Algorithms</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-target="100" data-suffix="%">0</div>
+    <div class="stat-label">Transparent Ranking</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-tag">How It Works</div>
+  <div class="section-title">From Upload to Ranked Results</div>
+  <div class="section-sub">Four simple steps — no manual searching required.</div>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3>Upload Profile</h3>
+      <p>Upload your CV or research summary as a PDF file.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3>Text Extraction</h3>
+      <p>pdfplumber reads and extracts all key information automatically.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3>Algorithm Match</h3>
+      <p>TF-IDF, RapidFuzz, and Hybrid score every grant call.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <h3>Ranked Results</h3>
+      <p>See ranked grants with full explanations and export options.</p>
+    </div>
+  </div>
+</div>
+
+<div class="algo-section">
+  <div class="section-tag">Algorithms</div>
+  <div class="section-title">Three Methods. Best One Wins.</div>
+  <div class="section-sub">All three algorithms run and the highest F1-Score is automatically selected.</div>
+
+  <div class="algo-grid">
+    <div class="algo-card">
+      <span class="algo-badge badge-teal">Algorithm A</span>
+      <h3>TF-IDF</h3>
+      <p>Converts text into vectors and uses cosine similarity to match topics.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-teal" style="width:70%;"></div></div>
+        <div class="algo-score-val">F1: 0.70</div>
+      </div>
+    </div>
+    <div class="algo-card">
+      <span class="algo-badge badge-amber">Algorithm B</span>
+      <h3>RapidFuzz</h3>
+      <p>Fuzzy keyword matching that handles abbreviations and wording variations.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-amber" style="width:69%;"></div></div>
+        <div class="algo-score-val">F1: 0.69</div>
+      </div>
+    </div>
+    <div class="algo-card">
+      <div class="winner-badge">Best Performer</div>
+      <span class="algo-badge badge-white">Algorithm C</span>
+      <h3>Hybrid</h3>
+      <p>Combines TF-IDF and RapidFuzz for balanced topic and keyword matching.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-white" style="width:84%;"></div></div>
+        <div class="algo-score-val">F1: 0.84</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

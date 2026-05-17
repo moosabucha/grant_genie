@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grant Genie — Create Account</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+ 
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">Grant<span>Genie</span></a>
+  <div class="nav-right">
+    <a class="nav-link" href="index.html">Home</a>
+    <a class="nav-link" href="login.html">Login</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+ 
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <a class="mobile-link" href="index.html">Home</a>
+  <a class="mobile-link" href="login.html">Login</a>
+</div>
+ 
+<!-- REGISTER FORM -->
+<div class="auth-page">
+  <div class="auth-card">
+    <a class="auth-back" href="index.html">&#8592; Back to home</a>
+    <div class="auth-tag">Create Account</div>
+    <h2 class="auth-title">Get started</h2>
+    <p class="auth-sub">Grant Genie is built for researchers. Create your account to begin matching.</p>
+ 
+    <div id="alert-container"></div>
+ 
+    <div class="form-group">
+      <label class="form-label" for="name">Full name</label>
+      <input class="form-input" type="text" id="name" placeholder="Dr. / Mr. / Ms. Your Name" autocomplete="name" required/>
+    </div>
+ 
+    <div class="form-group">
+      <label class="form-label" for="email">Email address</label>
+      <input class="form-input" type="email" id="email" placeholder="you@university.ac.uk" autocomplete="email" required/>
+    </div>
+ 
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input class="form-input" type="password" id="password" placeholder="Minimum 8 characters" autocomplete="new-password" required/>
+    </div>
+ 
+    <button class="form-btn" id="reg-btn" onclick="handleRegister()">Create account</button>
+ 
+    <div class="auth-switch">
+      Already registered? <a href="login.html">Sign in here</a>
+    </div>
+  </div>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+ 
+<script src="js/main.js"></script>
+<script>
+function handleRegister() {
+  var name = document.getElementById('name').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var password = document.getElementById('password').value;
+  var btn = document.getElementById('reg-btn');
+ 
+  if (!name || !email || !password) {
+    showToast('Please fill in all fields');
+    return;
+  }
+ 
+  if (!email.includes('@')) {
+    showToast('Please enter a valid email address');
+    return;
+  }
+ 
+  if (password.length < 8) {
+    showToast('Password must be at least 8 characters');
+    return;
+  }
+ 
+  btn.textContent = 'Creating account...';
+  btn.disabled = true;
+ 
+  localStorage.setItem('gg_user', JSON.stringify({ name: name, email: email }));
+ 
+  setTimeout(function () {
+    window.location.href = 'dashboard.html';
+  }, 900);
+}
+ 
+document.getElementById('password').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') handleRegister();
+});
+</script>
+</body>
+</html>
+ 

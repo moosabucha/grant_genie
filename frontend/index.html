@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Grant Genie — AI-powered research funding match platform"/>
+  <title>Grant Genie</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+ 
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="navbar-brand" href="index.html">Grant<span>Genie</span></a>
+ 
+  <!-- Desktop nav -->
+  <div class="nav-right">
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="nav-link" href="#algorithms">Algorithms</a>
+    <a class="nav-link" href="login.html">Login</a>
+    <a class="btn-nav" href="register.html">Get started</a>
+  </div>
+ 
+  <!-- Mobile hamburger -->
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+ 
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <a class="mobile-link" href="#how" onclick="document.getElementById('mobile-menu').classList.remove('open')">How it works</a>
+  <a class="mobile-link" href="#algorithms" onclick="document.getElementById('mobile-menu').classList.remove('open')">Algorithms</a>
+  <a class="mobile-link" href="login.html">Login</a>
+  <a class="mobile-cta" href="register.html">Get started</a>
+</div>
+ 
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">AI-Powered Research Funding</div>
+  <h1>Find grants that actually<br><em>match your research</em></h1>
+  <p class="hero-sub">Upload your research profile and Grant Genie automatically ranks the most relevant funding calls using three NLP algorithms, with a clear explanation for every recommendation.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="register.html">Start matching grants</a>
+    <a class="btn-outline" href="#how">See how it works</a>
+  </div>
+</section>
+ 
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num" data-target="800" data-suffix="+">0</div>
+    <div class="stat-label">Grant calls indexed</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-target="3" data-suffix="">0</div>
+    <div class="stat-label">Matching algorithms</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" data-target="100" data-suffix="%">0</div>
+    <div class="stat-label">Transparent results</div>
+  </div>
+</div>
+ 
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="section-tag">Process</div>
+  <div class="section-title">From upload to ranked results</div>
+  <div class="section-sub">Four steps, no manual searching, and every recommendation explained.</div>
+ 
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <h3>Upload your profile</h3>
+      <p>Upload your CV or research summary as a PDF, or type it directly into the text field on the dashboard.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <h3>Text extraction</h3>
+      <p>pdfplumber reads and extracts all key information from your profile automatically and accurately.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <h3>Algorithm matching</h3>
+      <p>Three NLP algorithms score every grant and the best-performing one is selected automatically using F1-Score.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <h3>Ranked results</h3>
+      <p>See grants ranked by relevance with keyword-level explanations and export your results to Excel or CSV.</p>
+    </div>
+  </div>
+</section>
+ 
+<!-- ALGORITHMS -->
+<section class="algo-section" id="algorithms">
+  <div class="section-tag">Algorithms</div>
+  <div class="section-title">Three methods. Best one wins.</div>
+  <div class="section-sub">All three algorithms run simultaneously. The one with the highest F1-Score on the labeled dataset is selected automatically.</div>
+ 
+  <div class="algo-grid">
+    <div class="algo-card">
+      <span class="algo-badge badge-teal">Algorithm A</span>
+      <h3>TF-IDF</h3>
+      <p>Converts documents into numerical vectors and calculates cosine similarity. Excellent for capturing overall topic alignment between your profile and a grant's focus area.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-teal" style="width:70%;"></div></div>
+        <div class="algo-score-val">F1: 0.70</div>
+      </div>
+    </div>
+ 
+    <div class="algo-card">
+      <span class="algo-badge badge-amber">Algorithm B</span>
+      <h3>RapidFuzz</h3>
+      <p>Fuzzy keyword matching that handles abbreviations and terminology variations. Catches matches that TF-IDF misses when wording differs between your profile and the grant text.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-amber" style="width:69%;"></div></div>
+        <div class="algo-score-val">F1: 0.69</div>
+      </div>
+    </div>
+ 
+    <div class="algo-card">
+      <div class="winner-badge">Best performer</div>
+      <span class="algo-badge badge-white">Algorithm C</span>
+      <h3>Hybrid</h3>
+      <p>A weighted combination of TF-IDF and RapidFuzz. Balances topic-level and keyword-level matching to produce the most accurate relevance scores across all grant types.</p>
+      <div class="algo-score-row">
+        <div class="algo-score-bar"><div class="algo-fill fill-white" style="width:84%;"></div></div>
+        <div class="algo-score-val">F1: 0.84</div>
+      </div>
+    </div>
+  </div>
+</section>
+ 
+<!-- FOOTER -->
+<footer>
+  <p>Grant Genie &mdash; Final Year Project &mdash; Muhammad Moosa Bucha &mdash; P2962600</p>
+</footer>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+ 
+<script src="js/main.js"></script>
+</body>
+</html>

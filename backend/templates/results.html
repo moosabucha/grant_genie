@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Grant Results{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-user">
+      <div class="avatar">{{ current_user.name[0] | upper }}</div>
+      <div>
+        <div class="user-name">{{ current_user.name }}</div>
+        <div class="user-role">Early Career Researcher</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-item active">
+        <div class="sidebar-dot"></div>Match Grants
+      </div>
+      <div class="sidebar-item" onclick="document.getElementById('alt-pool').scrollIntoView({behavior:'smooth'})">
+        <div class="sidebar-dot"></div>Alternative Pool
+      </div>
+      <div class="sidebar-item" onclick="document.getElementById('algo-report').scrollIntoView({behavior:'smooth'})">
+        <div class="sidebar-dot"></div>Algorithm Report
+      </div>
+      <div class="sidebar-item" style="margin-top:32px;">
+        <div class="sidebar-dot"></div>
+        <a href="{{ url_for('auth.logout') }}" style="color:inherit;text-decoration:none;">Sign Out</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-main">
+    <div class="results-header">
+      <div>
+        <h3>Your Matched Grants</h3>
+        <p>Best algorithm: <strong>{{ best_algo }}</strong> &mdash; F1 Score: {{ all_scores[best_algo]['f1'] }}</p>
+      </div>
+      <div class="algo-info">{{ best_algo }} selected</div>
+    </div>
+
+    <div class="export-row" style="margin-bottom:20px;">
+      <a href="{{ url_for('export.export_csv') }}" class="export-btn export-csv">Export CSV</a>
+      <a href="{{ url_for('export.export_excel') }}" class="export-btn export-excel">Export Excel</a>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="top">Top matches</button>
+      <button class="filter-btn" data-filter="mid">Partial</button>
+      <button class="filter-btn" data-filter="alt">Alternative pool</button>
+    </div>
+
+    {% for grant in top_grants %}
+    <div class="grant-card" data-score="{{ grant.score }}">
+      <div class="grant-info">
+        <div class="grant-title">{{ grant.title }}</div>
+        <div class="grant-meta">{{ grant.body }} &mdash; Deadline: {{ grant.deadline }}</div>
+        <div class="grant-tags">
+          {% for feature in grant.matched_features[:3] %}
+            <span class="tag">{{ feature.keyword }}</span>
+          {% endfor %}
+        </div>
+        {% if grant.feedback %}
+        <div class="grant-feedback">{{ grant.feedback }}</div>
+        {% endif %}
+      </div>
+      <div class="score-badge">
+        <div class="score-circle {% if grant.score >= 70 %}score-high{% elif grant.score >= 40 %}score-mid{% else %}score-low{% endif %}">
+          {{ grant.score }}%
+        </div>
+        <div class="score-label">
+          {% if grant.score >= 70 %}Strong{% elif grant.score >= 40 %}Partial{% else %}Low{% endif %} match
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+   <h3 id="alt-pool" style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin:32px 0 8px;">Alternative Pool</h3>
+{% if alt_pool %}
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px;">These grants scored below 40% but may be useful for future reference.</p>
+       {% for grant in alt_pool %}
+    <div class="grant-card alt-item" data-score="{{ grant.score }}">
+      <div class="grant-info">
+        <div class="grant-title">{{ grant.title }}</div>
+        <div class="grant-meta">{{ grant.body }}</div>
+        {% if grant.feedback %}
+        <div class="grant-feedback">{{ grant.feedback }}</div>
+        {% endif %}
+      </div>
+      <div class="score-badge">
+        <div class="score-circle score-low">{{ grant.score }}%</div>
+        <div class="score-label">Low match</div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div id="algo-report" style="margin-top:40px;background:var(--white);border-radius:16px;padding:28px;border:1px solid var(--border);">
+      <h3 style="font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);margin-bottom:16px;">Algorithm Report</h3>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:20px;">All three algorithms were evaluated. Best performer selected automatically based on F1-Score.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr style="background:var(--navy);color:#fff;">
+          <th style="padding:12px 16px;text-align:left;">Algorithm</th>
+          <th style="padding:12px 16px;text-align:center;">Precision</th>
+          <th style="padding:12px 16px;text-align:center;">Recall</th>
+          <th style="padding:12px 16px;text-align:center;">F1-Score</th>
+          <th style="padding:12px 16px;text-align:center;">Status</th>
+        </tr>
+         <tr style="background:var(--teal-light);">
+          <td style="padding:12px 16px;">TF-IDF</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['tfidf']['precision'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['tfidf']['recall'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['tfidf']['f1'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">Evaluated</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;">RapidFuzz</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['rapidfuzz']['precision'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['rapidfuzz']['recall'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['rapidfuzz']['f1'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">Evaluated</td>
+        </tr>
+        <tr style="background:var(--teal-light);">
+          <td style="padding:12px 16px;font-weight:500;">Hybrid</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['hybrid']['precision'] }}</td>
+          <td style="padding:12px 16px;text-align:center;">{{ all_scores['hybrid']['recall'] }}</td>
+          <td style="padding:12px 16px;text-align:center;font-weight:500;">{{ all_scores['hybrid']['f1'] }}</td>
+          <td style="padding:12px 16px;text-align:center;color:var(--teal);font-weight:500;">Selected</td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
