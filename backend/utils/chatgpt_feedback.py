@@ -17,7 +17,7 @@ def generate_feedback(profile_text, grant, is_alternative=False):
     grant_text  = grant.get('text', '')
     profile_short = profile_text[:500]
 
-    # ── Real ChatGPT if API key exists ──
+    # Real ChatGPT if API key exists
     if api_key:
         try:
             client = OpenAI(api_key=api_key)
@@ -58,7 +58,7 @@ Write personalized feedback for this researcher."""
         except Exception:
             pass  # Fall through to smart feedback
 
-    # ── Smart Feedback without API key ──
+    # Smart Feedback without API key
     return _smart_feedback(profile_short, grant_title, grant_body, grant_score, grant_text, is_alternative)
 
 

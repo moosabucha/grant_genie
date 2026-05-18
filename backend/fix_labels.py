@@ -12,14 +12,14 @@ import pandas as pd
 import random
 import os
 
-# ── Load already fetched real data ──
+# Load already fetched real data 
 grants_df      = pd.read_csv('grants.csv')
 researchers_df = pd.read_csv('researchers.csv')
 
 print(f"✅ Loaded {len(grants_df)} real grants")
 print(f"✅ Loaded {len(researchers_df)} real researchers")
 
-# ── Research domain keywords ──
+# Research domain keywords
 DOMAIN_KEYWORDS = {
     "Artificial Intelligence": [
         "machine learning", "deep learning", "neural", "artificial intelligence",
@@ -82,24 +82,24 @@ def compute_overlap(keywords, grant_text):
     return matches / len(keywords) if keywords else 0.0
 
 
-# ── Pre-compute grant domains ──
+# Pre-compute grant domains
 print("\n🔍 Detecting grant domains...")
 grants_list = grants_df.to_dict("records")
 for g in grants_list:
     g["domain"] = detect_domain(f"{g['title']} {g['abstract']}")
 
-# ── Assign domains to researchers (cycling through all 8) ──
+# Assign domains to researchers (cycling through all 8)
 researchers_list = researchers_df.to_dict("records")
 for i, r in enumerate(researchers_list):
     r["domain"]    = DOMAINS[i % len(DOMAINS)]
     r["keywords"]  = DOMAIN_KEYWORDS[r["domain"]]
 
-# ── Separate grants by domain ──
+# Separate grants by domain 
 domain_grants = {d: [] for d in DOMAINS}
 for g in grants_list:
     domain_grants[g["domain"]].append(g)
 
-# ── Create exactly 300 pairs with 100 each label ──
+# Create exactly 300 pairs with 100 each label
 TARGET_EACH = 100   # 100 Good + 100 Average + 100 Bad = 300 total
 
 good_pairs    = []
@@ -115,9 +115,9 @@ for researcher in researchers_list:
     r_domain   = researcher["domain"]
     r_keywords = researcher["keywords"]
 
-    # Same domain grants → likely Good Fit
+    # Same domain grants - likely Good Fit
     same_domain   = domain_grants.get(r_domain, [])
-    # Different domain grants → likely Bad Fit
+    # Different domain grants - likely Bad Fit
     other_domains = [d for d in DOMAINS if d != r_domain]
     diff_domain   = []
     for d in other_domains:
@@ -191,7 +191,7 @@ for researcher in researchers_list:
         elif label == "Bad_pairs" and len(bad_pairs) < TARGET_EACH:
             bad_pairs.append(pair)
 
-# ── If still not enough, force fill with score-based assignment ──
+# If still not enough, force fill with score-based assignment
 print("⚙️  Balancing distribution...")
 
 all_computed = []
@@ -206,7 +206,7 @@ all_computed.sort(key=lambda x: x[2], reverse=True)
 
 total = len(all_computed)
 
-# Top 33% → Good Fit
+# Top 33% - Good Fit
 for researcher, grant, overlap in all_computed[:total//3]:
     if len(good_pairs) >= TARGET_EACH:
         break
@@ -233,7 +233,7 @@ for researcher, grant, overlap in all_computed[:total//3]:
         })
         pair_id += 1
 
-# Middle 33% → Average Fit
+# Middle 33% - Average Fit
 for researcher, grant, overlap in all_computed[total//3: 2*total//3]:
     if len(average_pairs) >= TARGET_EACH:
         break
@@ -259,7 +259,7 @@ for researcher, grant, overlap in all_computed[total//3: 2*total//3]:
         })
         pair_id += 1
 
-# Bottom 33% → Bad Fit
+# Bottom 33% - Bad Fit
 for researcher, grant, overlap in all_computed[2*total//3:]:
     if len(bad_pairs) >= TARGET_EACH:
         break
@@ -285,14 +285,14 @@ for researcher, grant, overlap in all_computed[2*total//3:]:
         })
         pair_id += 1
 
-# ── Combine and save ──
+# Combine and save
 all_pairs = good_pairs[:TARGET_EACH] + average_pairs[:TARGET_EACH] + bad_pairs[:TARGET_EACH]
 random.shuffle(all_pairs)
 
 pairs_df = pd.DataFrame(all_pairs)
 pairs_df.to_csv('labeled_pairs.csv', index=False, encoding='utf-8')
 
-# ── Summary ──
+# Summary
 counts = pairs_df["label"].value_counts()
 print("\n" + "═"*50)
 print("  ✅  LABELED PAIRS FIXED!")

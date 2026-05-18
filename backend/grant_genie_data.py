@@ -243,10 +243,7 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
     random.shuffle(pairs)
     return pairs
 
-
-# ══════════════════════════════════════
 # MAIN
-# ══════════════════════════════════════
 if __name__ == "__main__":
     print("\n═══════════════════════════════════════")
     print("  GRANT GENIE — Real Data Collector")

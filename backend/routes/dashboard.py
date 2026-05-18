@@ -62,7 +62,7 @@ def match_grants():
             research_text, grant, is_alternative=True
         )
 
-    # Save results to file for export
+    # Save results to the file for export
     export_data = {
         'top_grants': top_grants,
         'alt_pool'  : alt_pool,
