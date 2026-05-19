@@ -7,210 +7,238 @@ import os
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-export_bp = Blueprint('export', __name__)
+export_bp = Blueprint("export", __name__)
 
 
 def get_results_data():
     try:
-        with open('last_results.json', 'r') as f:
+        with open("last_results.json", "r") as f:
             data = json.load(f)
         return (
-            data.get('top_grants', []),
-            data.get('alt_pool', []),
-            data.get('best_algo', 'Hybrid'),
-            data.get('all_scores', {})
+            data.get("top_grants", []),
+            data.get("alt_pool", []),
+            data.get("best_algo", "Hybrid"),
+            data.get("all_scores", {}),
         )
     except Exception as e:
         print(f"Could not load results: {e}")
-        return [], [], 'Hybrid', {}
+        return [], [], "Hybrid", {}
 
 
 def build_rows(top_grants, alt_pool, best_algo):
     rows = []
     for grant in top_grants:
-        score = grant.get('score', 0)
-        rows.append({
-            'Grant Title'    : grant.get('title', ''),
-            'Funder'         : grant.get('body', 'UKRI'),
-            'Match Score (%)': score,
-            'Match Level'    : 'Strong Match' if score >= 70 else 'Partial Match',
-            'Algorithm Used' : best_algo.upper(),
-            'Deadline'       : grant.get('deadline', 'Open'),
-            'Pool'           : 'Top Match',
-            'AI Feedback'    : grant.get('feedback', ''),
-            'Source URL'     : grant.get('source', ''),
-        })
+        score = grant.get("score", 0)
+        rows.append(
+            {
+                "Grant Title": grant.get("title", ""),
+                "Funder": grant.get("body", "UKRI"),
+                "Match Score (%)": score,
+                "Match Level": "Strong Match" if score >= 70 else "Partial Match",
+                "Algorithm Used": best_algo.upper(),
+                "Deadline": grant.get("deadline", "Open"),
+                "Pool": "Top Match",
+                "AI Feedback": grant.get("feedback", ""),
+                "Source URL": grant.get("source", ""),
+            }
+        )
     for grant in alt_pool:
-        score = grant.get('score', 0)
-        rows.append({
-            'Grant Title'    : grant.get('title', ''),
-            'Funder'         : grant.get('body', 'UKRI'),
-            'Match Score (%)': score,
-            'Match Level'    : 'Low Match',
-            'Algorithm Used' : best_algo.upper(),
-            'Deadline'       : grant.get('deadline', 'Open'),
-            'Pool'           : 'Alternative Pool',
-            'AI Feedback'    : grant.get('feedback', ''),
-            'Source URL'     : grant.get('source', ''),
-        })
+        score = grant.get("score", 0)
+        rows.append(
+            {
+                "Grant Title": grant.get("title", ""),
+                "Funder": grant.get("body", "UKRI"),
+                "Match Score (%)": score,
+                "Match Level": "Low Match",
+                "Algorithm Used": best_algo.upper(),
+                "Deadline": grant.get("deadline", "Open"),
+                "Pool": "Alternative Pool",
+                "AI Feedback": grant.get("feedback", ""),
+                "Source URL": grant.get("source", ""),
+            }
+        )
     return rows
 
 
-@export_bp.route('/export/csv')
+@export_bp.route("/export/csv")
 @login_required
 def export_csv():
     top_grants, alt_pool, best_algo, all_scores = get_results_data()
     rows = build_rows(top_grants, alt_pool, best_algo)
     if not rows:
-        rows = [{'Grant Title': 'No results found', 'Match Score (%)': 0}]
+        rows = [{"Grant Title": "No results found", "Match Score (%)": 0}]
     df = pd.DataFrame(rows)
     output = io.StringIO()
     df.to_csv(output, index=False)
     output.seek(0)
     response = make_response(output.getvalue())
-    response.headers['Content-Disposition'] = 'attachment; filename=grant_genie_results.csv'
-    response.headers['Content-Type'] = 'text/csv'
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=grant_genie_results.csv"
+    )
+    response.headers["Content-Type"] = "text/csv"
     return response
 
 
-@export_bp.route('/export/excel')
+@export_bp.route("/export/excel")
 @login_required
 def export_excel():
     top_grants, alt_pool, best_algo, all_scores = get_results_data()
     rows = build_rows(top_grants, alt_pool, best_algo)
     if not rows:
-        rows = [{'Grant Title': 'No results found', 'Match Score (%)': 0}]
+        rows = [{"Grant Title": "No results found", "Match Score (%)": 0}]
     df = pd.DataFrame(rows)
     output = io.BytesIO()
 
     thin_border = Border(
-        left=Side(style='thin', color='CCCCCC'),
-        right=Side(style='thin', color='CCCCCC'),
-        top=Side(style='thin', color='CCCCCC'),
-        bottom=Side(style='thin', color='CCCCCC')
+        left=Side(style="thin", color="CCCCCC"),
+        right=Side(style="thin", color="CCCCCC"),
+        top=Side(style="thin", color="CCCCCC"),
+        bottom=Side(style="thin", color="CCCCCC"),
     )
 
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Grant Results', startrow=3)
-        ws = writer.sheets['Grant Results']
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Grant Results", startrow=3)
+        ws = writer.sheets["Grant Results"]
 
-        ws.merge_cells('A1:I1')
-        t = ws['A1']
-        t.value     = 'Grant Genie — Matched Research Funding Opportunities'
-        t.font      = Font(name='Calibri', size=16, bold=True, color='FFFFFF')
-        t.fill      = PatternFill('solid', fgColor='1B2A4A')
-        t.alignment = Alignment(horizontal='center', vertical='center')
+        ws.merge_cells("A1:I1")
+        t = ws["A1"]
+        t.value = "Grant Genie — Matched Research Funding Opportunities"
+        t.font = Font(name="Calibri", size=16, bold=True, color="FFFFFF")
+        t.fill = PatternFill("solid", fgColor="1B2A4A")
+        t.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[1].height = 35
 
-        ws.merge_cells('A2:I2')
-        s = ws['A2']
-        s.value     = f'Best Algorithm: {best_algo.upper()}   |   Generated by Grant Genie'
-        s.font      = Font(name='Calibri', size=11, italic=True, color='FFFFFF')
-        s.fill      = PatternFill('solid', fgColor='2E86AB')
-        s.alignment = Alignment(horizontal='center', vertical='center')
+        ws.merge_cells("A2:I2")
+        s = ws["A2"]
+        s.value = f"Best Algorithm: {best_algo.upper()}   |   Generated by Grant Genie"
+        s.font = Font(name="Calibri", size=11, italic=True, color="FFFFFF")
+        s.fill = PatternFill("solid", fgColor="2E86AB")
+        s.alignment = Alignment(horizontal="center", vertical="center")
         ws.row_dimensions[2].height = 22
         ws.row_dimensions[3].height = 8
 
         for col_num, col_name in enumerate(df.columns, 1):
             cell = ws.cell(row=4, column=col_num)
-            cell.value     = col_name
-            cell.font      = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
-            cell.fill      = PatternFill('solid', fgColor='1B2A4A')
-            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.value = col_name
+            cell.font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+            cell.fill = PatternFill("solid", fgColor="1B2A4A")
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center", wrap_text=True
+            )
         ws.row_dimensions[4].height = 30
 
-        green_fill  = PatternFill('solid', fgColor='E8F5E9')
-        yellow_fill = PatternFill('solid', fgColor='FFF9E6')
-        red_fill    = PatternFill('solid', fgColor='FFF0F0')
+        green_fill = PatternFill("solid", fgColor="E8F5E9")
+        yellow_fill = PatternFill("solid", fgColor="FFF9E6")
+        red_fill = PatternFill("solid", fgColor="FFF0F0")
 
         for row_num, row_data in enumerate(rows, 5):
-            score = row_data.get('Match Score (%)', 0)
-            pool  = row_data.get('Pool', '')
-            if pool == 'Alternative Pool':
+            score = row_data.get("Match Score (%)", 0)
+            pool = row_data.get("Pool", "")
+            if pool == "Alternative Pool":
                 row_fill = red_fill
             elif score >= 70:
                 row_fill = green_fill
             else:
                 row_fill = yellow_fill
             for col_num, col_name in enumerate(df.columns, 1):
-                cell        = ws.cell(row=row_num, column=col_num)
-                cell.value  = row_data.get(col_name, '')
-                cell.fill   = row_fill
+                cell = ws.cell(row=row_num, column=col_num)
+                cell.value = row_data.get(col_name, "")
+                cell.fill = row_fill
                 cell.border = thin_border
-                cell.font   = Font(name='Calibri', size=10)
+                cell.font = Font(name="Calibri", size=10)
                 cell.alignment = Alignment(
-                    vertical='center', wrap_text=True,
-                    horizontal='center' if col_name in [
-                        'Match Score (%)', 'Algorithm Used', 'Pool', 'Match Level'
-                    ] else 'left'
+                    vertical="center",
+                    wrap_text=True,
+                    horizontal=(
+                        "center"
+                        if col_name
+                        in ["Match Score (%)", "Algorithm Used", "Pool", "Match Level"]
+                        else "left"
+                    ),
                 )
             ws.row_dimensions[row_num].height = 50
 
         col_widths = {
-            'Grant Title'    : 45,
-            'Funder'         : 20,
-            'Match Score (%)': 15,
-            'Match Level'    : 15,
-            'Algorithm Used' : 15,
-            'Deadline'       : 15,
-            'Pool'           : 18,
-            'AI Feedback'    : 55,
-            'Source URL'     : 40,
+            "Grant Title": 45,
+            "Funder": 20,
+            "Match Score (%)": 15,
+            "Match Level": 15,
+            "Algorithm Used": 15,
+            "Deadline": 15,
+            "Pool": 18,
+            "AI Feedback": 55,
+            "Source URL": 40,
         }
         for col_num, col_name in enumerate(df.columns, 1):
-            ws.column_dimensions[get_column_letter(col_num)].width = col_widths.get(col_name, 15)
+            ws.column_dimensions[get_column_letter(col_num)].width = col_widths.get(
+                col_name, 15
+            )
 
-        ws2 = writer.book.create_sheet('Algorithm Report')
-        ws2.merge_cells('A1:E1')
-        t2 = ws2['A1']
-        t2.value     = 'Grant Genie — Algorithm Evaluation Report'
-        t2.font      = Font(name='Calibri', size=14, bold=True, color='FFFFFF')
-        t2.fill      = PatternFill('solid', fgColor='1B2A4A')
-        t2.alignment = Alignment(horizontal='center', vertical='center')
+        ws2 = writer.book.create_sheet("Algorithm Report")
+        ws2.merge_cells("A1:E1")
+        t2 = ws2["A1"]
+        t2.value = "Grant Genie — Algorithm Evaluation Report"
+        t2.font = Font(name="Calibri", size=14, bold=True, color="FFFFFF")
+        t2.fill = PatternFill("solid", fgColor="1B2A4A")
+        t2.alignment = Alignment(horizontal="center", vertical="center")
         ws2.row_dimensions[1].height = 30
 
-        for col, h in enumerate(['Algorithm', 'Precision', 'Recall', 'F1-Score', 'Status'], 1):
+        for col, h in enumerate(
+            ["Algorithm", "Precision", "Recall", "F1-Score", "Status"], 1
+        ):
             cell = ws2.cell(row=2, column=col)
-            cell.value     = h
-            cell.font      = Font(bold=True, color='FFFFFF', name='Calibri')
-            cell.fill      = PatternFill('solid', fgColor='2E86AB')
-            cell.alignment = Alignment(horizontal='center')
+            cell.value = h
+            cell.font = Font(bold=True, color="FFFFFF", name="Calibri")
+            cell.fill = PatternFill("solid", fgColor="2E86AB")
+            cell.alignment = Alignment(horizontal="center")
 
         algo_data = [
-            ('TF-IDF',
-             all_scores.get('tfidf', {}).get('precision', 0.72),
-             all_scores.get('tfidf', {}).get('recall', 0.68),
-             all_scores.get('tfidf', {}).get('f1', 0.70), 'Evaluated'),
-            ('RapidFuzz',
-             all_scores.get('rapidfuzz', {}).get('precision', 0.68),
-             all_scores.get('rapidfuzz', {}).get('recall', 0.71),
-             all_scores.get('rapidfuzz', {}).get('f1', 0.69), 'Evaluated'),
-            (best_algo.upper(),
-             all_scores.get(best_algo, {}).get('precision', 0.85),
-             all_scores.get(best_algo, {}).get('recall', 0.83),
-             all_scores.get(best_algo, {}).get('f1', 0.84), '✅ Selected'),
+            (
+                "TF-IDF",
+                all_scores.get("tfidf", {}).get("precision", 0.72),
+                all_scores.get("tfidf", {}).get("recall", 0.68),
+                all_scores.get("tfidf", {}).get("f1", 0.70),
+                "Evaluated",
+            ),
+            (
+                "RapidFuzz",
+                all_scores.get("rapidfuzz", {}).get("precision", 0.68),
+                all_scores.get("rapidfuzz", {}).get("recall", 0.71),
+                all_scores.get("rapidfuzz", {}).get("f1", 0.69),
+                "Evaluated",
+            ),
+            (
+                best_algo.upper(),
+                all_scores.get(best_algo, {}).get("precision", 0.85),
+                all_scores.get(best_algo, {}).get("recall", 0.83),
+                all_scores.get(best_algo, {}).get("f1", 0.84),
+                "✅ Selected",
+            ),
         ]
 
         for row_num, (algo, p, r, f, status) in enumerate(algo_data, 3):
-            is_best = status == '✅ Selected'
-            fill = PatternFill('solid', fgColor='E8F5E9' if is_best else 'F9F9F9')
+            is_best = status == "✅ Selected"
+            fill = PatternFill("solid", fgColor="E8F5E9" if is_best else "F9F9F9")
             for col, val in enumerate([algo, p, r, f, status], 1):
                 cell = ws2.cell(row=row_num, column=col)
-                cell.value     = val
-                cell.fill      = fill
-                cell.font      = Font(name='Calibri', bold=is_best,
-                                     color='1B6B1B' if is_best else '000000')
-                cell.alignment = Alignment(horizontal='center')
-                cell.border    = thin_border
+                cell.value = val
+                cell.fill = fill
+                cell.font = Font(
+                    name="Calibri",
+                    bold=is_best,
+                    color="1B6B1B" if is_best else "000000",
+                )
+                cell.alignment = Alignment(horizontal="center")
+                cell.border = thin_border
             ws2.row_dimensions[row_num].height = 25
 
-        for col, width in zip(['A', 'B', 'C', 'D', 'E'], [20, 15, 15, 15, 15]):
+        for col, width in zip(["A", "B", "C", "D", "E"], [20, 15, 15, 15, 15]):
             ws2.column_dimensions[col].width = width
 
     output.seek(0)
     return send_file(
         output,
-        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         as_attachment=True,
-        download_name='grant_genie_results.xlsx'
+        download_name="grant_genie_results.xlsx",
     )

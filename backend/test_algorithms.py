@@ -11,8 +11,8 @@ from algorithms.hybrid_matcher import *
 from algorithms.rapidfuzz_matcher import *
 from algorithms.tfidf_matcher import *
 
-
 # ========== TEST CASES ==========
+
 
 def test_imports():
     """Test that all modules import correctly"""
@@ -22,24 +22,28 @@ def test_imports():
 def test_evaluator_exists():
     """Test evaluator module has functions"""
     import algorithms.evaluator as evaluator
+
     assert evaluator is not None
 
 
 def test_hybrid_matcher_exists():
     """Test hybrid_matcher module exists"""
     import algorithms.hybrid_matcher as hybrid
+
     assert hybrid is not None
 
 
 def test_rapidfuzz_matcher_exists():
     """Test rapidfuzz_matcher module exists"""
     import algorithms.rapidfuzz_matcher as rapidfuzz
+
     assert rapidfuzz is not None
 
 
 def test_tfidf_matcher_exists():
     """Test tfidf_matcher module exists"""
     import algorithms.tfidf_matcher as tfidf
+
     assert tfidf is not None
 
 

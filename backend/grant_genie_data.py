@@ -14,48 +14,151 @@ from tqdm import tqdm
 import time
 
 BASE_URL = "https://gtr.ukri.org/gtr/api"
-HEADERS  = {"Accept": "application/json"}
+HEADERS = {"Accept": "application/json"}
 
 DOMAIN_KEYWORDS = {
     "Artificial Intelligence": [
-        "machine learning", "deep learning", "neural", "artificial intelligence",
-        "computer vision", "natural language", "nlp", "reinforcement", "classification",
-        "prediction", "algorithm", "data mining", "pattern recognition", "ai"
+        "machine learning",
+        "deep learning",
+        "neural",
+        "artificial intelligence",
+        "computer vision",
+        "natural language",
+        "nlp",
+        "reinforcement",
+        "classification",
+        "prediction",
+        "algorithm",
+        "data mining",
+        "pattern recognition",
+        "ai",
     ],
     "Climate & Environment": [
-        "climate", "carbon", "greenhouse", "sustainability", "renewable",
-        "net zero", "environmental", "ecology", "biodiversity", "atmospheric",
-        "emissions", "global warming", "flood", "ocean", "pollution"
+        "climate",
+        "carbon",
+        "greenhouse",
+        "sustainability",
+        "renewable",
+        "net zero",
+        "environmental",
+        "ecology",
+        "biodiversity",
+        "atmospheric",
+        "emissions",
+        "global warming",
+        "flood",
+        "ocean",
+        "pollution",
     ],
     "Biomedical & Health": [
-        "cancer", "diabetes", "drug", "clinical", "biomedical", "genomic",
-        "protein", "disease", "therapy", "vaccine", "patient", "health",
-        "mental health", "surgery", "imaging", "biomarker", "pharmaceutical", "medical"
+        "cancer",
+        "diabetes",
+        "drug",
+        "clinical",
+        "biomedical",
+        "genomic",
+        "protein",
+        "disease",
+        "therapy",
+        "vaccine",
+        "patient",
+        "health",
+        "mental health",
+        "surgery",
+        "imaging",
+        "biomarker",
+        "pharmaceutical",
+        "medical",
     ],
     "Data Science & Statistics": [
-        "data science", "statistical", "big data", "analytics", "regression",
-        "bayesian", "modelling", "simulation", "dataset", "epidemiology",
-        "survey", "sampling", "quantitative", "computational"
+        "data science",
+        "statistical",
+        "big data",
+        "analytics",
+        "regression",
+        "bayesian",
+        "modelling",
+        "simulation",
+        "dataset",
+        "epidemiology",
+        "survey",
+        "sampling",
+        "quantitative",
+        "computational",
     ],
     "Social Sciences": [
-        "social", "inequality", "education", "poverty", "policy", "community",
-        "qualitative", "gender", "economic", "welfare", "migration", "employment",
-        "housing", "public", "cultural", "political", "society"
+        "social",
+        "inequality",
+        "education",
+        "poverty",
+        "policy",
+        "community",
+        "qualitative",
+        "gender",
+        "economic",
+        "welfare",
+        "migration",
+        "employment",
+        "housing",
+        "public",
+        "cultural",
+        "political",
+        "society",
     ],
     "Cybersecurity & Computing": [
-        "cybersecurity", "security", "encryption", "network", "privacy", "blockchain",
-        "distributed", "cloud", "software", "hardware", "internet of things",
-        "cryptography", "authentication", "cyber", "digital"
+        "cybersecurity",
+        "security",
+        "encryption",
+        "network",
+        "privacy",
+        "blockchain",
+        "distributed",
+        "cloud",
+        "software",
+        "hardware",
+        "internet of things",
+        "cryptography",
+        "authentication",
+        "cyber",
+        "digital",
     ],
     "Engineering & Physics": [
-        "engineering", "materials", "nanotechnology", "quantum", "photonics",
-        "semiconductor", "robotics", "manufacturing", "aerospace", "fluid",
-        "thermal", "mechanical", "structural", "signal", "physics", "optical"
+        "engineering",
+        "materials",
+        "nanotechnology",
+        "quantum",
+        "photonics",
+        "semiconductor",
+        "robotics",
+        "manufacturing",
+        "aerospace",
+        "fluid",
+        "thermal",
+        "mechanical",
+        "structural",
+        "signal",
+        "physics",
+        "optical",
     ],
     "Biology & Life Sciences": [
-        "biology", "genetics", "cell", "molecular", "microbiology", "neuroscience",
-        "evolution", "plant", "agriculture", "food", "bacteria", "virus",
-        "dna", "rna", "stem cell", "tissue", "organism", "species"
+        "biology",
+        "genetics",
+        "cell",
+        "molecular",
+        "microbiology",
+        "neuroscience",
+        "evolution",
+        "plant",
+        "agriculture",
+        "food",
+        "bacteria",
+        "virus",
+        "dna",
+        "rna",
+        "stem cell",
+        "tissue",
+        "organism",
+        "species",
     ],
 }
 DOMAINS = list(DOMAIN_KEYWORDS.keys())
@@ -85,35 +188,39 @@ def fetch_grants(target=350):
             if not data:
                 break
             if page == 1:
-                print(f"\n  ✅ Connected! {data.get('totalSize',0):,} real grants available\n")
+                print(
+                    f"\n  ✅ Connected! {data.get('totalSize',0):,} real grants available\n"
+                )
             for proj in data.get("project", []):
-                gid      = proj.get("id", "")
-                title    = proj.get("title", "").strip()
+                gid = proj.get("id", "")
+                title = proj.get("title", "").strip()
                 abstract = proj.get("abstractText", "").strip()
                 if gid in seen or not title or len(abstract) < 80:
                     continue
                 seen.add(gid)
-                fund   = proj.get("fund", {})
+                fund = proj.get("fund", {})
                 amount = 0
-                start  = ""
-                end    = ""
+                start = ""
+                end = ""
                 if isinstance(fund, dict):
                     val = fund.get("valuePounds", {})
                     if isinstance(val, dict):
                         amount = val.get("amount", 0)
                     start = fund.get("start", "")[:10]
-                    end   = fund.get("end", "")[:10]
-                grants.append({
-                    "grant_id"   : gid,
-                    "title"      : title,
-                    "abstract"   : abstract,
-                    "funder"     : proj.get("grantCategory", "UKRI") or "UKRI",
-                    "status"     : proj.get("status", ""),
-                    "amount_gbp" : amount,
-                    "start_date" : start,
-                    "end_date"   : end,
-                    "source_url" : f"https://gtr.ukri.org/projects?ref={gid}",
-                })
+                    end = fund.get("end", "")[:10]
+                grants.append(
+                    {
+                        "grant_id": gid,
+                        "title": title,
+                        "abstract": abstract,
+                        "funder": proj.get("grantCategory", "UKRI") or "UKRI",
+                        "status": proj.get("status", ""),
+                        "amount_gbp": amount,
+                        "start_date": start,
+                        "end_date": end,
+                        "source_url": f"https://gtr.ukri.org/projects?ref={gid}",
+                    }
+                )
                 pbar.update(1)
                 if len(grants) >= target:
                     break
@@ -135,17 +242,19 @@ def fetch_researchers(target=50):
             if not data:
                 break
             for person in data.get("person", []):
-                pid   = person.get("id", "")
+                pid = person.get("id", "")
                 fname = person.get("firstName", "").strip()
                 lname = person.get("surname", "").strip()
                 if pid in seen or not fname or not lname:
                     continue
                 seen.add(pid)
-                researchers.append({
-                    "researcher_id": pid,
-                    "full_name"    : f"{fname} {lname}",
-                    "source_url"   : f"https://gtr.ukri.org/person/{pid}",
-                })
+                researchers.append(
+                    {
+                        "researcher_id": pid,
+                        "full_name": f"{fname} {lname}",
+                        "source_url": f"https://gtr.ukri.org/person/{pid}",
+                    }
+                )
                 pbar.update(1)
                 if len(researchers) >= target:
                     break
@@ -176,7 +285,7 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
 
     # Assign domains to researchers
     for i, r in enumerate(researchers_list):
-        r["domain"]   = DOMAINS[i % len(DOMAINS)]
+        r["domain"] = DOMAINS[i % len(DOMAINS)]
         r["keywords"] = DOMAIN_KEYWORDS[r["domain"]]
 
     # Detect domain for each grant
@@ -189,7 +298,7 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
     all_pairs = []
     for r in researchers_list:
         for g in grants_list:
-            text    = f"{g['title']} {g['abstract']}"
+            text = f"{g['title']} {g['abstract']}"
             overlap = compute_overlap(r["keywords"], text)
             all_pairs.append((r, g, overlap))
 
@@ -198,9 +307,9 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
     total = len(all_pairs)
 
     # Top 33% = Good, Middle 33% = Average, Bottom 33% = Bad
-    good_pool    = all_pairs[:total//3]
-    average_pool = all_pairs[total//3: 2*total//3]
-    bad_pool     = all_pairs[2*total//3:]
+    good_pool = all_pairs[: total // 3]
+    average_pool = all_pairs[total // 3 : 2 * total // 3]
+    bad_pool = all_pairs[2 * total // 3 :]
 
     random.shuffle(good_pool)
     random.shuffle(average_pool)
@@ -208,25 +317,25 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
 
     def make_pair(pid, r, g, overlap, label):
         return {
-            "pair_id"            : f"PAIR_{pid:04d}",
-            "researcher_id"      : r["researcher_id"],
-            "researcher_name"    : r["full_name"],
-            "researcher_domain"  : r["domain"],
+            "pair_id": f"PAIR_{pid:04d}",
+            "researcher_id": r["researcher_id"],
+            "researcher_name": r["full_name"],
+            "researcher_domain": r["domain"],
             "researcher_keywords": ", ".join(r["keywords"][:6]),
-            "researcher_source"  : r["source_url"],
-            "grant_id"           : g["grant_id"],
-            "grant_title"        : g["title"],
-            "grant_abstract"     : g["abstract"][:400],
-            "grant_funder"       : g["funder"],
-            "grant_amount_gbp"   : g["amount_gbp"],
-            "grant_domain"       : g["domain"],
-            "grant_source"       : g["source_url"],
-            "overlap_score"      : round(overlap, 4),
-            "label"              : label,
+            "researcher_source": r["source_url"],
+            "grant_id": g["grant_id"],
+            "grant_title": g["title"],
+            "grant_abstract": g["abstract"][:400],
+            "grant_funder": g["funder"],
+            "grant_amount_gbp": g["amount_gbp"],
+            "grant_domain": g["domain"],
+            "grant_source": g["source_url"],
+            "overlap_score": round(overlap, 4),
+            "label": label,
         }
 
     pairs = []
-    pid   = 1
+    pid = 1
 
     for r, g, overlap in good_pool[:target_each]:
         pairs.append(make_pair(pid, r, g, overlap, "Good Fit"))
@@ -243,6 +352,7 @@ def create_balanced_pairs(grants_list, researchers_list, target_each=100):
     random.shuffle(pairs)
     return pairs
 
+
 # MAIN
 if __name__ == "__main__":
     print("\n═══════════════════════════════════════")
@@ -253,23 +363,21 @@ if __name__ == "__main__":
 
     # Step 1: Grants
     raw_grants = fetch_grants(350)
-    grants_df  = pd.DataFrame(raw_grants).drop_duplicates("grant_id")
+    grants_df = pd.DataFrame(raw_grants).drop_duplicates("grant_id")
     grants_df.to_csv("grants.csv", index=False)
     print(f"\n  💾 Saved {len(grants_df)} grants → grants.csv")
 
     # Step 2: Researchers
-    raw_res    = fetch_researchers(50)
-    res_df     = pd.DataFrame(raw_res).drop_duplicates("researcher_id")
+    raw_res = fetch_researchers(50)
+    res_df = pd.DataFrame(raw_res).drop_duplicates("researcher_id")
     res_df.to_csv("researchers.csv", index=False)
     print(f"  💾 Saved {len(res_df)} researchers → researchers.csv")
 
     # Step 3: Balanced Pairs
-    pairs      = create_balanced_pairs(
-                    grants_df.to_dict("records"),
-                    res_df.to_dict("records"),
-                    target_each=100
-                 )
-    pairs_df   = pd.DataFrame(pairs)
+    pairs = create_balanced_pairs(
+        grants_df.to_dict("records"), res_df.to_dict("records"), target_each=100
+    )
+    pairs_df = pd.DataFrame(pairs)
     pairs_df.to_csv("labeled_pairs.csv", index=False)
 
     # Summary
@@ -281,8 +389,8 @@ if __name__ == "__main__":
     print(f"\n  Label Distribution:")
     for label in ["Good Fit", "Average Fit", "Bad Fit"]:
         count = counts.get(label, 0)
-        pct   = round(count / len(pairs_df) * 100, 1)
-        bar   = "█" * (count // 5)
+        pct = round(count / len(pairs_df) * 100, 1)
+        bar = "█" * (count // 5)
         print(f"    {label:<14} {count:>3} ({pct}%)  {bar}")
     print(f"\n  💾 grants.csv")
     print(f"  💾 researchers.csv")
