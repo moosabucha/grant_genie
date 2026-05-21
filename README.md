@@ -7,4 +7,4 @@ How to Run :
 4. Open browser: http://127.0.0.1:5000 
 Requirements :
 pip install -r requirements.txt 
-Muhammad Moosa Bucha
+
